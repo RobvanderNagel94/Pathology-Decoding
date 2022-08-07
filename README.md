@@ -59,3 +59,23 @@ these properties influence the decisions made to assign labels to
 EEG recordings. Another strong motivator for using such features is
 that they are already being used in clinical practice, enhancing fea-
 ture interpretability and explainability. 
+
+Shirrmeister et al. (2017) and van Leeuwen et al. (2019) have
+set strong baselines to decode pathology using raw input data in
+an end-to-end way. The approaches are essentially similar, but dif-
+fer in minor degree. Therefore, the deep ConvNet models used in these
+papers are set as baseline model for comparison of the other feature-
+based models. To validate whether feature-based models outperform
+the baseline end-to-end performance, we propose to build multiple
+feature-based models; one class of models based on multichannel
+data using a trial-wise decoding strategy, and the other class on
+single-channel data using an image-based decoding strategy. In this
+way we can systematically evaluate different decoding steps and
+better assess the parts on their contribution to the total decoding
+performance. 
+
+# Code
+
+- Baseline pathology decoding model (end-to-end): deep4
+- 6x Trial-wise decoding models (feature-based): clf_LR, clf_SVM, clf_RF, clf_KNN, clf_MLP, clf_MVC3
+- 3x Image-based decoding models (feature-based): VGG16_pwr, VGG16_mNNC, VGG16_APLR 
