@@ -77,5 +77,5 @@ performance.
 # Code
 
 - Baseline pathology decoding model (end-to-end): deep4
-- 6x Trial-wise decoding models (feature-based): clf_LR, clf_SVM, clf_RF, clf_KNN, clf_MLP, clf_MVC3
-- 3x Image-based decoding models (feature-based): VGG16_pwr, VGG16_mNNC, VGG16_APLR 
+- 6 Trial-wise decoding models (feature-based): clf_LR, clf_SVM, clf_RF, clf_KNN, clf_MLP, clf_MVC3
+- 3 Image-based decoding models (feature-based): VGG16_pwr, VGG16_mNNC, VGG16_APLR 
