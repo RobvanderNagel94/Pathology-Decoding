@@ -1,4 +1,4 @@
-# Pathology-Decoding
+# Detecting abnormal EEGs using features of the background pattern
 
 Electroencephalography (EEG) is a non-invasive technique used for
 monitoring and recording brain electrical activity. EEGs provide
