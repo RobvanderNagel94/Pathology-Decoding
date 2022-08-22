@@ -62,9 +62,3 @@ single-channel data using an image-based decoding strategy. In this
 way we can systematically evaluate different decoding steps and
 better assess the parts on their contribution to the total decoding
 performance. 
-
-# Code
-
-- Baseline pathology decoding model (end-to-end): deep4
-- 6 Trial-wise decoding models (feature-based): clf_LR, clf_SVM, clf_RF, clf_KNN, clf_MLP, clf_MVC3
-- 3 Image-based decoding models (feature-based): VGG16_pwr, VGG16_mNNC, VGG16_APLR 
