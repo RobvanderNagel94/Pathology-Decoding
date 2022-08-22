@@ -1,0 +1,6 @@
+NOVERLAP = 256
+WINDOW = 512
+NFFT = 512
+FS = 250
+fmin = 3
+fmax = 18
