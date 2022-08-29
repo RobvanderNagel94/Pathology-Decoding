@@ -183,8 +183,7 @@ def QSLOW(EEG_closed):
 
 def QASYM(EEG, channels):
     """Computes asymmetrical background patterns by comparing rhythmic activity between the two hemispheres in corresponding
-       left and right channel pairs. For each lr-channel pair (8x) a normalised value is computed.
-       The final asymmetry value is found by normalising the individual asymmetry values for each channel pair.
+       left and right channel pairs. 
 
     Parameters
     ----------
@@ -285,11 +284,11 @@ def QREAC(x_o1_open, x_o1_closed, dominant_peak_frequency):
 
     assert type(x_o1_open) and type(x_o1_closed) == np.ndarray, "Exception: Returned Type Mismatch"
     assert x_o1_closed.shape[0] and x_o1_open.shape[0] >= 250 * 5, "Exception: To few datapoints recorded"
-    assert (dominant_peak_frequency >= 2) and (dominant_peak_frequency <= 18), "Exception: Peak frequency must be " \
-                                                                               "between [2-18]Hz. "
+    assert (dominant_peak_frequency >= 2) and (dominant_peak_frequency <= 16), "Exception: Peak frequency must be " \
+                                                                               "between [2-16]Hz. "
     # Compute narrow frequency bound between the dominant peak frequency
     fmin = dominant_peak_frequency - 0.5
-    fmax = dominant_peak_frequency + 0.5
+    fmax = dominant_peak_frequency + 0.5 
 
     # Compute Welch's coefficients for all eyes closed and open segments
     _, Pxx_closed = WelchEstimate(x_o1_closed, c.FS, c.NOVERLAP, c.NFFT, c.WINDOW, fmin, fmax)
