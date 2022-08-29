@@ -5,7 +5,7 @@ monitoring and recording brain electrical activity. EEGs provide
 essential information about brain functioning and assist clinicians
 in studying the long-term effects of neurological conditions like
 epilepsy, Alzheimer’s disease, Parkinson’s disease, schizophrenia
-and depression. Routine recordings are usually examined by board-certified clinicians that analyse recordings following two guidelines: the recognition of transients and analysis of the background pattern. Transients refer to relatively
+and depression. Routine recordings are usually examined by board-certified clinicians that analyse recordings following two guidelines: recognition of transients and analysis of the background pattern. Transients refer to relatively
 rare events, including physiological and pathological waveforms,
 while the background pattern refers to the mean statistical characteristics of the EEG. Important components of the background pattern
 include the posterior dominant rhythm (PDR), reactivity, frequency
