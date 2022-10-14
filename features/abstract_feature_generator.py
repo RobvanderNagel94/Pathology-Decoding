@@ -7,10 +7,3 @@ class AbstractFeatureGenerator(ABC):
         self.agg_mode = agg_mode
         self.times_list = []
 
-    @abstractmethod
-    def generate_features(self, data):
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_feature_labels(self):
-        raise NotImplementedError
