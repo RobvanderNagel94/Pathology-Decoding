@@ -118,7 +118,7 @@ def classifier_param_search(meta,
     X_train_scaled = sc.fit_transform(X_train)
     X_test_scaled = sc.transform(X_test)
 
-    accuracies = []
+    specificities = []
     params = []
     for model in tqdm(meta):
         clf = model["estimator"]
@@ -134,8 +134,10 @@ def classifier_param_search(meta,
 
         # compute the model's accuracy
         tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-        acc = (tp + tn) / (tp + fp + fn + tn)
-        accuracies.append(acc)
+        spec = tn / (tn + fp)
+        sens = tp / (tp + fn)
+   
+        specificities.append(spec)
         params.append(grid_search.best_params_)
 
         # print best parameters
@@ -146,4 +148,4 @@ def classifier_param_search(meta,
     with open('best_params.pkl', 'wb') as f:
         pickle.dump(params, f)
     with open('best_acc.pkl', 'wb') as f:
-        pickle.dump(accuracies, f)
+        pickle.dump(specificities, f)
