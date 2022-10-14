@@ -368,7 +368,7 @@ def rsBSI(EEG, channels):
     return float((Rn - Ln) / (Rn + Ln))
 
 
-def APLR(EEG_segment):
+def center_of_gravity(EEG_segment):
     """Computes the left-right and anterior-posterior power distributions measured along the scalp using
        van Putten's center-of-gravity feature.
 
