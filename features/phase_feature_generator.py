@@ -29,7 +29,7 @@ class PhaseFeatureGenerator(AbstractFeatureGenerator):
         # n_windows x n_bands x n_elecs x n_samples_in_window
         epochs_instantaneous_phases = features_phase.instantaneous_phases(
             band_signals=band_epochs, axis=-1)
-
+        
         # n_windows x n_bands x n_signals*(n_signals-1)/2
         phase_locking_values = features_phase.phase_locking_values(
             inst_phases=epochs_instantaneous_phases)
