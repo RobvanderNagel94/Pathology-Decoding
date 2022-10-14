@@ -1,1 +1,1 @@
-# Detecting pathological EEGs using features of the background pattern
+# Detecting pathological scalp recordings using features of the EEG background pattern
