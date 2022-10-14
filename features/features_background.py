@@ -403,7 +403,7 @@ def center_of_gravity(EEG_segment):
         power.append(Pxx)
 
     # output from source: X=[Fp2 F8 T4 T6 O2 F4 C4 P4 Fz Cz Pz F3 C3 P3 Fp1 F7 T3 T5 O1]
-    # compute the euclidean distances for each channel location from the center location (e.g., channel Cz)
+    # compute the euclidean distances for each channel location from the center location (i.e., channel Cz)
     X = np.array([0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, -1, -1, -1, 0, -2, -2, -2, -1])  # x-direction (LR)
     Y = np.array([0, 1, 0, -1, -2, 1, 0, -1, 1, 0, -1, 1, 0, -1, 0, 1, 0, -1, -2])  # y-direction (AP)
     P = np.array(power).T
