@@ -104,13 +104,8 @@ def classifier_param_search(meta,
     dataset_ab_train = dataset[dataset.label_bool == 1][test_size:]
     dataset_no_train = dataset[dataset.label_bool == 0][test_size:]
 
-    # bootstrap with resampling for the minority class
-    class_ab = np.random.choice(dataset_ab_train.idx.values, size=sample_size)
-    class_ab_df = pd.concat([dataset_ab_train[dataset_ab_train.idx == class_ab[i]] for i in range(len(class_ab))])
-    df_class_ab_bootstrap = pd.concat([class_ab_df, dataset_ab_train])
-
     # construct train and test sets
-    dataset_train = pd.concat([dataset_no_train, df_class_ab_bootstrap], axis=0)
+    dataset_train = pd.concat([dataset_ab_train, dataset_no_train], axis=0)
     dataset_test = pd.concat([dataset_ab_test, dataset_no_test], axis=0)
 
     y_train = dataset_train.label_bool.values
