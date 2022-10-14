@@ -427,7 +427,7 @@ def mNNC(EEG_segment):
     Returns
     -------
     COH_max : float
-         The final output is the maximum coherence value measured from all 19 channels.
+         The final output are the maximum coherence values from all 19 channels.
 
     References
     ----------
