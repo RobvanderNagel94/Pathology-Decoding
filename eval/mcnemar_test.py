@@ -67,3 +67,5 @@ def McNemarTest(y_true, y_pred_base, y_pred_comp):
     else:
         print('Different proportions of errors (reject H0)')
     return statistic, p_value
+
+
