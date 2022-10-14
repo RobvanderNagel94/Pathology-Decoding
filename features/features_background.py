@@ -426,8 +426,8 @@ def mNNC(EEG_segment):
 
     Returns
     -------
-    COH_max : float
-         The final output are the maximum coherence values from all 19 channels.
+    COH_max : List
+         The final outputs are the maximum coherence values from all 19 channels.
 
     References
     ----------
@@ -551,4 +551,4 @@ def mNNC(EEG_segment):
     # save only the maximum nearest neighbor coherence value
     COH_max = np.max(AllCOH)
 
-    return float(COH_max)
+    return COH_max
