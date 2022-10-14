@@ -84,3 +84,4 @@ def phase_locking_value2(theta1, theta2):
     ys_mean = np.mean(np.sin(delta), axis=-1)
     PLVs = np.linalg.norm([xs_mean, ys_mean], axis=0)
     return PLVs
+
