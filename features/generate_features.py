@@ -288,7 +288,6 @@ def generate_time_features(crops, sfreq, agg_func, axis=-1):
     lumpiness = ft.lumpiness(epochs=crops, freq=sfreq)
     flat_spots = ft.flat_spots(epochs=crops)
     lyapunov_exp = ft.largest_lyapunov_exponent(epochs=crops, axis=axis, Tau=Tau, n=n, T=T, fs=sfreq)
-    detrend_fa = ft.detrended_fluctuation_analysis(epochs=crops, axis=axis)
     max_ = ft.maximum(epochs=crops, axis=axis)
     mean_ = ft.mean(epochs=crops, axis=axis)
     median_ = ft.median(epochs=crops, axis=axis)
@@ -301,7 +300,7 @@ def generate_time_features(crops, sfreq, agg_func, axis=-1):
     zero_crossings_dev = ft.zero_crossing_derivative(epochs=crops, axis=axis)
 
     time_features = np.hstack((
-        energy_, fisher_info, higuchi_fractal_dim, activity, detrend_fa,
+        energy_, fisher_info, higuchi_fractal_dim, activity,
         complexity, mobility, hurst_exp, kurt, line_length, lumpiness, flat_spots,
         lyapunov_exp, max_, mean_, median_, min_, non_lin_energy, petrosian_fractal_dim,
         skew, svd_entropy_, zero_crossings, zero_crossings_dev))
