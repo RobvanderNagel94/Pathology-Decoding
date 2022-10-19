@@ -394,32 +394,7 @@ def _embed_seq(X, Tau, D):
     strides = (X.itemsize, Tau * X.itemsize)
     return np.lib.stride_tricks.as_strided(X, shape=shape, strides=strides)
 
-
-def flat_spots(epochs):
-    """ Computes the number of flat spots in the series, calculated by discretizing the series
-         into 10 equal sized intervals and counting the maximum run length within any single interval.
-
-    Parameters
-    ----------
-    epochs : numpy array
-        one dimensional embedding.
-
-    Returns
-    -------
-    number_of_flat_spots :  numpy array
-        Number of flat spots.
-    """
-
-    try:
-        cut_x = pd.cut(epochs, bins=10, include_lowest=True, labels=False) + 1
-    except:
-        return 0
-
-    number_of_flat_spots = np.array([sum(1 for i in g) for k, g in groupby(cut_x)]).max()
-    return number_of_flat_spots
-
-
-def lumpiness(epochs, freq=sfreq):
+def lumpiness(epochs, axis, **kwargs):
     """" Computes the variance of the variances based on a division of the series in non-overlapping portions.
          The size of the portions if the frequency of the series.
 
@@ -436,17 +411,48 @@ def lumpiness(epochs, freq=sfreq):
     lumpiness_ :  numpy array
         Level of lumpiness of the series.
     """
+    
+    def lump_1d(x):
+        freq=250
+        nr = len(x)
+        lower = np.arange(0, nr, freq)
+        upper = lower + freq
+        nsegs = nr / freq
+        varx = [np.nanvar(x[lower[idx]:upper[idx]], ddof=1) for idx in np.arange(int(nsegs))]
+        if nr < 2 * freq:
+            lump = 0
+        else:
+            lump = np.nanvar(varx, ddof=1)
+        return lump
+            
+    return np.apply_along_axis(lump_1d, axis, epochs)
 
-    nr = len(epochs)
-    lower = np.arange(0, nr, freq)
-    upper = lower + freq
-    nsegs = nr / freq
-    varx = [np.nanvar(epochs[lower[idx]:upper[idx]], ddof=1) for idx in np.arange(int(nsegs))]
-    if nr < 2 * freq:
-        lumpiness_ = 0
-    else:
-        lumpiness_ = np.nanvar(varx, ddof=1)
-    return lumpiness_
+
+def flat_spots(epochs, axis, **kwargs):
+    """ Computes the number of flat spots in the series, calculated by discretizing the series
+         into 10 equal sized intervals and counting the maximum run length within any single interval.
+
+    Parameters
+    ----------
+    epochs : numpy array
+        one dimensional embedding.
+
+    Returns
+    -------
+    number_of_flat_spots :  numpy array
+        Number of flat spots.
+    """
+    def flatspots_1d(epochs):
+        try:
+            cut_x = pd.cut(epochs, bins=10, include_lowest=True, labels=False) + 1
+        except:
+            return 0
+
+        nofs = np.array([sum(1 for i in g) for k, g in groupby(cut_x)]).max()
+        return nofs
+    
+    return np.apply_along_axis(flatspots_1d, axis, epochs)
+
 
 def zero_crossing(epochs, axis, **kwargs):
     e = 0.01
