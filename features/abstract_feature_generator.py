@@ -6,4 +6,3 @@ class AbstractFeatureGenerator(ABC):
         self.electrodes = electrodes
         self.agg_mode = agg_mode
         self.times_list = []
-
