@@ -33,7 +33,6 @@ default_feature_generation_params = {
     "band_overlap": band_overlap
 }
 
-
 class WaveletTransformer(object):
     def __init__(self):
         pass
