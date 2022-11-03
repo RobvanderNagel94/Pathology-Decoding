@@ -28,3 +28,6 @@ def spectral_entropy(coefficients, axis=None):
 
 def variance(coefficients, axis):
     return np.var(coefficients, axis=axis)
+
+
+
