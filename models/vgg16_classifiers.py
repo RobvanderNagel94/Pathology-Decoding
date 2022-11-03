@@ -100,9 +100,7 @@ class Objective(object):
                                 shuffle=True, verbose=1,
                                 callbacks=callbacks_list)
 
-        validation_loss = np.min(history.history['val_loss'])
-
-        return validation_loss
+        return history
 
 
 if __name__ == '__main__':
