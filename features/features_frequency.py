@@ -27,4 +27,3 @@ def value_range(power_spectrum, axis=-1):
 
 def variance(power_spectrum, axis=-1):
     return np.var(power_spectrum, axis=axis)
-
