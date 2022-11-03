@@ -2,7 +2,6 @@ import numpy as np
 import abstract_feature_generator as AbstractFeatureGenerator
 import features_frequency as features_frequency
 
-
 class FrequencyFeatureGenerator(AbstractFeatureGenerator):
     """ computes features in the frequency domain implemented in features_
     frequency using fourier transform """
