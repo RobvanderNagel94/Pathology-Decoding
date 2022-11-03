@@ -491,8 +491,3 @@ def median(epochs, axis, **kwargs):
 
 def minimum(epochs, axis, **kwargs):
     return np.min(epochs, axis=axis)
-
-
-
-
-
