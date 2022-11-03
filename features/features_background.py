@@ -548,7 +548,4 @@ def mNNC(EEG_segment):
     # coherence values from all 19 channels at each frequency
     AllCOH = [cFp2, cF8, cT4, cT6, cO2, cF4, cC4, cP4, cFz, cCz, cPz, cF3, cC3, cP3, cFp1, cF7, cT3, cT5, cO1]
 
-    # save only the maximum nearest neighbor coherence value
-    COH_max = np.max(AllCOH)
-
-    return COH_max
+    return AllCOH 
