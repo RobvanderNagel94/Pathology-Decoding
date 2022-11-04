@@ -39,7 +39,7 @@ def fitCurve(P, f_bound=[2,18]):
     """
     
     assert type(P) == np.ndarray, "Exception: Returned Type Mismatch"
-    assert np.min(P) != 0, "Exception: Cannot normalise series: division by zero"
+    assert np.min(P) != 0, "Exception: Division by zero"
     
     def _iter1_approx(x, t, y):
         bg = x[0] - x[1]*np.log10(t)
