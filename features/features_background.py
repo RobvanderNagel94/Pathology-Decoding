@@ -55,7 +55,8 @@ def WelchEstimate(x, fs, NOVERLAP, NFFT, WINDOW, fmin, fmax):
     Pxx = Pxx[start:end]  # bound between [fmin,fmax]
     return f, Pxx
 
-def fitCurve(P, f_bound=[2,18]):
+
+def fitCurve(Pxx, f_bound=[2,18]):
     
     """Find the dominant peak frequencies in the estimated power spectrum.
        The function "scipy.signals.find_peaks" was used to guess an initial dominant peak location 
@@ -69,7 +70,7 @@ def fitCurve(P, f_bound=[2,18]):
        Pbg(f) = B − C · log(f)
     Parameters
     ----------
-    P : numpy array
+    Pxx : numpy array
          1D array of the power estimates for a given segment.
     f_bound : numpy array or list
          A given frequency bound to search for peaks.
@@ -90,8 +91,8 @@ def fitCurve(P, f_bound=[2,18]):
     ..https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html
     """
     
-    assert type(P) == np.ndarray, "Exception: Returned Type Mismatch"
-    assert np.min(P) != 0, "Exception: Division by zero"
+    assert type(Pxx) == np.ndarray, "Exception: Returned Type Mismatch"
+    assert np.min(Pxx) != 0, "Exception: Division by zero"
     
     def _iter1_approx(x, t, y):
         bg = x[0] - x[1]*np.log10(t)
@@ -112,7 +113,7 @@ def fitCurve(P, f_bound=[2,18]):
         return pk1 + pk2 + bg
 
     # define the log spectrum in the desired frequency band
-    y_train = np.log(P[f_bound[0]:f_bound[1]])
+    y_train = np.log(Pxx[f_bound[0]:f_bound[1]])
     t_train = np.arange(1,len(y_train)+1)
 
     # approximate the highest peak in the log spectrum
