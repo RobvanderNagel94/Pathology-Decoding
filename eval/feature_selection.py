@@ -100,5 +100,5 @@ def select_k_best_features(clf,
         dic[feature_names[i]] = fs.scores_[i]
 
     # sort features in descending order
-    sorted_feature_importance = sorted(dic.items(), key=lambda x: x[1], reverse=True)
-    return sorted_feature_importance
+    return sorted(dic.items(), key=lambda x: x[1], reverse=True)
+  
