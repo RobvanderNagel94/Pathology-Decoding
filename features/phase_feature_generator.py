@@ -46,3 +46,5 @@ class PhaseFeatureGenerator(AbstractFeatureGenerator):
             domain=domain, electrodes=elecs, agg_mode=agg)
         self.sync_feats = ["plv"]
         self.bands = bands
+
+        
