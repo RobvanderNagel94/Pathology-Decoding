@@ -106,3 +106,4 @@ def show_feature_maps(img_path, img_size, model, last_conv_layer_name, classifie
     # return GradCam visualization
     return superimposed_img
 
+
