@@ -1,146 +1,96 @@
-from scipy.signal import find_peaks, peak_prominences, find_peaks_cwt
-from features_background import WelchEstimate
 import numpy as np
-import config as c
+from scipy.optimize import least_squares
+from scipy.signal import find_peaks, peak_prominences
 
-def normalise(x):
-    assert type(x) == np.ndarray, "Exception: Returned Type Mismatch"
-    assert np.min(x) != 0, "Exception: Cannot normalise series: division by zero"
-    return (x - np.min(x)) / (np.max(x) - np.min(x))
-
-
-def find_peaks_alpha_power(x_o1_closed, x_o2_closed, threshold=1.5):
-    """Find peak frequencies in the estimated power spectrum.
-      A combination of both "scipy.signals.find_peaks" and "scipy.signals.find_peaks_cwt"
-      were used to find an initial dominant peak location before estimating the dominant frequency.
-      The initial peak suggestion is based on neighboring peak frequencies. The total method comprises
-      three main steps:
-
-      Step 1) Estimate the log power spectra using Welch’s method and
-              detect initial peak frequencies.
-
-      Step 2) Compute dominant peak suggestions from initial peak frequencies
-              detected in both log power spectra.
-
-      Step 3) Estimate dominant peak frequency from the estimated mean
-              log power spectrum in the occipital region.
+def fitCurve(P, f_bound=[2,18]):
+    
+    """Find the dominant peak frequencies in the estimated power spectrum.
+       The function "scipy.signals.find_peaks" was used to guess an initial dominant peak location 
+       before estimating the dominant frequency. We proposed an iterative curve-fitting method to localized segments
+       of EEG to approximate the two most dominant peak locations, including their amplitudes and widths. 
+       Given the estimated power spectrum for a given segment, we fitted the following curve:
+      
+       Plog(f) ≈ Pcurve(f) = Ppk1(f) + Ppk2(f) + Pbg(f)
+       Ppk1(f) = A1 · exp((f − f1)^2 / Δ1^2)
+       Ppk2(f) = A2 · exp((f − f2)^2 / Δ2^2)
+       Pbg(f) = B − C · log(f)
 
     Parameters
     ----------
-    x_o1_closed : numpy array
-         1D array of the channel values from the o1 channel in the eyes closed state
-         Input array requires common reference montage.
-
-    x_o2_closed : numpy array
-         1D array of the channel values from the o2 channel in the eyes closed state
-         Input array requires common reference montage.
-
-    threshold : float
-         Parameter threshold to find neighbouring peak frequencies (e.g., pk +- threshold)
-
+    P : numpy array
+         1D array of the power estimates for a given segment.
+    f_bound : numpy array or list
+         A given frequency bound to search for peaks.
+    
     Returns
     -------
-    Qpeak : float
-        dominant alpha peak frequency
-
+    Pcurve : numpy array
+             Optimized spectral curve.
+             
+    Paramaters : list
+              Parameters A1 and A2 are the amplitudes, f1 and f2 the center
+              frequencies and Δ1 and Δ2 the widths. C is a power-law approximation
+              and B a normalization factor.
+    
     References
     ----------
     ..https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
-    ..https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks_cwt.html
+    ..https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html
     """
+    
+    assert type(P) == np.ndarray, "Exception: Returned Type Mismatch"
+    assert np.min(P) != 0, "Exception: Cannot normalise series: division by zero"
+    
+    def _iter1_approx(x, t, y):
+        bg = x[0] - x[1]*np.log10(t)
+        return y - bg
+    def _iter2_approx(x, t, y):
+        bg = x[0]- C *np.log10(t)
+        pk1 = x[1]*np.exp(-np.power(t-x[2],2)/np.power(x[3],2))
+        return y - pk1 - bg
+    def _iter3_approx(x,t,y):
+        bg = x[0]- C *np.log10(t)
+        pk1 = A1*np.exp(-np.power(t-f1,2)/np.power(d1,2))
+        pk2 = x[1]*np.exp(-np.power(t-x[2],2)/np.power(x[3],2))
+        return y - pk1 - pk2 - bg
+    def _spectral_curve(B, C, A1, A2, f1, f2, d1, d2, t):
+        bg = B-C*np.log10(t)
+        pk1 = A1*np.exp(-np.power(t-f1,2)/np.power(d1,2))
+        pk2 = A2*np.exp(-np.power(t-f2,2)/np.power(d2,2))
+        return pk1 + pk2 + bg
 
-    def _find_peaks(fnorm, Pnorm):
-        peaks_welch, _ = find_peaks(Pnorm)
-        peaks_cwt = find_peaks_cwt(Pnorm, np.arange(1, 50))
+    # define the log spectrum in the desired frequency band
+    y_train = np.log(P[f_bound[0]:f_bound[1]])
+    t_train = np.arange(1,len(y_train)+1)
 
-        if len(peaks_welch) and len(peaks_cwt) > 0:
-            npp_welch = peak_prominences(Pnorm, peaks_welch)[0].tolist()
-            npp_cwt = peak_prominences(Pnorm, peaks_cwt)[0].tolist()
-            peaks_welch = [fnorm[peaks_welch[i]] for i in range(len(peaks_welch))]
-            peaks_cwt = fnorm[peaks_cwt]
-            peak_all = [i for s in [peaks_welch, peaks_cwt] for i in s]
-            npp_all = [i for s in [npp_welch, npp_cwt] for i in s]
-            return peak_all, npp_all
+    # approximate the highest peak in the log spectrum
+    peak, _ = find_peaks(y_train)
+    prominence = peak_prominences(y_train, peak)[0]
+    index = prominence.tolist().index(np.max(prominence))
+    f1 = peak[index]
+    A1 = y_train[peak[index]]
 
-        elif len(peaks_welch) > 0:
-            npp_welch = peak_prominences(Pnorm, peaks_welch)[0].tolist()
-            peaks_wel = [fnorm[peaks_welch[i]] for i in range(len(peaks_welch))]
-            return peaks_wel, npp_welch
-        else:
-            print('No dominant peaks found!')
-            return [], []
+    # Step 1: init params B and C, optimize for {B,C} = argmin |Plog − Pbg|
+    B,C = 0, 0
+    x1 = np.array([B, C]) 
+    res_lsq1 = least_squares(_iter1_approx, x1, args=(t_train, y_train), method='lm')
+    # retrieve the optimized params, keep C fixed
+    B,_ = res_lsq1.x
 
-    def _peak_suggestion(peaks, npps, threshold):
-        npp = []
-        # add neighboring peak prominences for each detected peak
-        for pkf in range(len(peaks)):
-            npp_add = npps[pkf]
-            peak_init = peaks[pkf]
-            for neighbor in range(len(peaks)):
-                if (peak_init - peaks[neighbor] >= threshold) or (peak_init - peaks[neighbor] >= -threshold):
-                    npp_add += npps[neighbor]
-            npp.append(npp_add)
+    # Step 2: init params B, A1, f1 and d1, optimize for {A1,f1,Δ1,B} = argmin |Plog − Ppk1 − Pbg|
+    x2 = np.array([B, A1, f1, 1])
+    res_lsq2 = least_squares(_iter2_approx, x2, args=(t_train, y_train), method='lm')
+    B, A1, f1, d1 = res_lsq2.x
 
-        # save all peak and npp pairs in dict, sort in descending order
-        to_dict = dict(zip(peaks, npp))
-        return sorted(to_dict.items(), key=lambda x: x[1], reverse=True)[:1]
+    # Step 3: init params B, A2, f2 and d2, optimize for {A2,f2,Δ2,B} = argmin |Plog − Ppk1 − Ppk2 − Pbg|
+    x3 = np.array([B, 11, 12, 1])
+    res_lsq3 = least_squares(_iter3_approx, x3, args=(t_train, y_train), method='lm')
+    B, A2, f2, d2 = res_lsq3.x
 
-    fmin = 3
-    fmax = 16
+    # Step 4: derive the spectral curve from the estimated parameters
+    Pcurve = _spectral_curve(B, C, A1, A2, f1, f2, d1, d2, t_train)
 
-    # estimate power spectrum using Welch's method
-    f, Pxx_o1 = WelchEstimate(x_o1_closed, c.FS, c.NOVERLAP, c.NFFT, c.WINDOW, fmin, fmax)
-    f, Pxx_o2 = WelchEstimate(x_o2_closed, c.FS, c.NOVERLAP, c.NFFT, c.WINDOW, fmin, fmax)
-    Pxx_o12 = np.array([Pxx_o1, Pxx_o2]).sum(axis=0) * 0.5
+    # adjust the frequency parameters for f_bound
+    f1, f2 = f1+f_bound[0], f2+f_bound[0]
 
-    # create frequency bound for power spectrum
-    f_lim = f[(f >= fmin) & (f <= fmax)]            # [fmin,fmax] = [3,16] Hz
-    start = f.tolist().index(f_lim[0])              # get first freq index
-    end = f.tolist().index(f_lim[-1]) + 1           # get last freq index
-    fnorm = f[start:end]                            # bound spectrum
-
-    # normalise power spectrum
-    Pnorm_o1 = normalise(Pxx_o1)
-    Pnorm_o2 = normalise(Pxx_o2)
-    Pnorm_o12 = normalise(Pxx_o12)
-
-    # find alpha peak frequencies
-    peaks_o1, npps_o1 = _find_peaks(fnorm, Pnorm_o1)
-    peaks_o2, npps_o2 = _find_peaks(fnorm, Pnorm_o2)
-    Peaks = [i for s in [peaks_o1, peaks_o2] for i in s]
-    Npps = [i for s in [npps_o1, npps_o2] for i in s]
-    assert len(Peaks) == len(Npps)
-
-    if len(Peaks) and len(Npps) > 0:
-
-        # apply peak function and retrieve suggested dominant peak frequency
-        f_loc = _peak_suggestion(Peaks, Npps, threshold)
-
-        # define narrow frequency bound for the most dominant peak detected
-        f_upper_bound = f_loc[0][0] + 1.5
-        f_lower_bound = f_loc[0][0] - 1.5
-        f_lim = f[(f >= f_lower_bound) & (f <= f_upper_bound)]
-        start = f.tolist().index(f_lim[0])
-        end = f.tolist().index(f_lim[-1]) + 1
-        fnorm = f[start:end]
-
-        # find peaks in the suggested narrow frequency bound
-        peak, _ = find_peaks(fnorm, Pnorm_o12)
-        npp = peak_prominences(Pnorm_o12, peak)[0]
-        map_hz = npp.tolist().index(np.max(npp))
-        Qpeak = fnorm[map_hz]
-        return Qpeak
-
-    else:
-        # if no peaks were found, skip peak suggestion and find peaks
-        peak, _ = find_peaks(fnorm, Pnorm_o12)
-        npp = peak_prominences(Pnorm_o12, peak)[0]
-        map_hz = npp.tolist().index(np.max(npp))
-        Qpeak = fnorm[peak[map_hz]]
-
-    if Qpeak:
-        print('Alpha peak frequency: ', round(Qpeak, 2), ' Hz')
-        return float(Qpeak)
-    else:
-        print('No dominant peak detected!')
-        return 0.
+    return np.array(Pcurve), [B, C, A1, A2, f1, f2, d1, d2]
